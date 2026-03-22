@@ -3,6 +3,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.SwingUtilities;
 
 /**
  * COMPILADOR - Orquestador de fases
@@ -63,11 +64,15 @@ public class Compilador {
                 return;
             }
         } else {
-            nombreArchivo = "<programa de demostracion>";
-            codigoFuente  = PROGRAMA_DEMO;
+            lanzarGUI();
+            return;
         }
 
         compilar(codigoFuente, nombreArchivo);
+    }
+
+    public static void lanzarGUI() {
+        SwingUtilities.invokeLater(() -> new CompiladorGUI().setVisible(true));
     }
 
     public static void compilar(String codigoFuente, String nombreArchivo) {
