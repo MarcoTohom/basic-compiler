@@ -9,14 +9,10 @@ import java.util.List;
 public class ResultadosPanel extends JTabbedPane {
     private final JTextPane tokensPane;
     private final JLabel tokensCountLabel;
-    private final ErrorPanel erroresSintacticosPanel;
-    private final JLabel sintacticoStatusLabel;
     private final JTable tablaSimbolos;
     private final DefaultTableModel modeloSimbolos;
     private final JLabel simbolosCountLabel;
     private final ErrorPanel erroresSemanticosPanel;
-    private final JTextPane tacPane;
-    private final JLabel tacErrorLabel;
 
     public ResultadosPanel() {
         setTabPlacement(JTabbedPane.TOP);
@@ -38,17 +34,6 @@ public class ResultadosPanel extends JTabbedPane {
         scrollTokens.setBorder(null);
         pTokens.add(scrollTokens, BorderLayout.CENTER);
         addTab("Tokens (Fase 1)", pTokens);
-
-        // Pestana 2: Sintactico
-        JPanel pSintactico = new JPanel(new BorderLayout());
-        pSintactico.setBackground(CompiladorGUI.BG_EDITOR);
-        sintacticoStatusLabel = new JLabel("Esperando...");
-        sintacticoStatusLabel.setForeground(CompiladorGUI.TEXT_SECUNDARIO);
-        sintacticoStatusLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
-        pSintactico.add(sintacticoStatusLabel, BorderLayout.NORTH);
-        erroresSintacticosPanel = new ErrorPanel();
-        pSintactico.add(erroresSintacticosPanel, BorderLayout.CENTER);
-        addTab("Sintactico (Fase 2)", pSintactico);
 
         // Pestana 3: Simbolos
         JPanel pSimbolos = new JPanel(new BorderLayout());
@@ -72,24 +57,6 @@ public class ResultadosPanel extends JTabbedPane {
         erroresSemanticosPanel.setPreferredSize(new Dimension(0, 150));
         pSimbolos.add(erroresSemanticosPanel, BorderLayout.SOUTH);
         addTab("Simbolos (Fase 3)", pSimbolos);
-
-        // Pestana 4: Codigo TAC
-        JPanel pTac = new JPanel(new BorderLayout());
-        pTac.setBackground(CompiladorGUI.BG_EDITOR);
-        tacErrorLabel = new JLabel("Codigo intermedio omitido — corrija los errores primero");
-        tacErrorLabel.setForeground(CompiladorGUI.COLOR_WARN);
-        tacErrorLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        tacErrorLabel.setVisible(false);
-        pTac.add(tacErrorLabel, BorderLayout.NORTH);
-
-        tacPane = new JTextPane();
-        tacPane.setEditable(false);
-        tacPane.setBackground(CompiladorGUI.BG_EDITOR);
-        tacPane.setFont(new Font("Consolas", Font.PLAIN, 14));
-        JScrollPane scrollTac = new JScrollPane(tacPane);
-        scrollTac.setBorder(null);
-        pTac.add(scrollTac, BorderLayout.CENTER);
-        addTab("Codigo TAC (Fase 4)", pTac);
     }
 
     public void mostrarResultado(ResultadoCompilacion r) {
@@ -97,17 +64,7 @@ public class ResultadosPanel extends JTabbedPane {
         tokensCountLabel.setText("Total: " + (r.tokens.size() - 1) + " tokens generados");
         TokenRenderer.renderTokens(tokensPane, r.tokens);
 
-        // Sintactico
-        List<ErrorCompilador> errSint = filtrarErrores(r.errores, ErrorCompilador.Fase.SINTACTICA);
-        if (errSint.isEmpty()) {
-            sintacticoStatusLabel.setText("Estructura sintactica valida");
-            sintacticoStatusLabel.setForeground(CompiladorGUI.COLOR_EXITO);
-        } else {
-            sintacticoStatusLabel.setText(errSint.size() + " errores sintacticos");
-            sintacticoStatusLabel.setForeground(CompiladorGUI.COLOR_ERROR);
-        }
-        erroresSintacticosPanel.setErrores(errSint);
-
+       
         // Simbolos
         simbolosCountLabel.setText("Total: " + r.simbolos.size() + " simbolos declarados");
         modeloSimbolos.setRowCount(0);
@@ -120,64 +77,8 @@ public class ResultadosPanel extends JTabbedPane {
         }
         erroresSemanticosPanel.setErrores(filtrarErrores(r.errores, ErrorCompilador.Fase.SEMANTICA));
 
-        // TAC
-        tacPane.setText("");
-        if (r.exitoso) {
-            tacErrorLabel.setVisible(false);
-            renderizarTAC(r.instruccionesTAC);
-        } else {
-            tacErrorLabel.setVisible(true);
-        }
     }
 
-    private void renderizarTAC(List<GeneradorCodigo.Instruccion> instrucciones) {
-        StyledDocument doc = tacPane.getStyledDocument();
-        int n = 0;
-        for (GeneradorCodigo.Instruccion ins : instrucciones) {
-            String codigo = ins.codigo;
-            Style style = tacPane.addStyle("tac", null);
-            StyleConstants.setForeground(style, CompiladorGUI.TEXT_PRINCIPAL);
-
-            try {
-                // Numero de linea
-                Style sNum = tacPane.addStyle("num", null);
-                StyleConstants.setForeground(sNum, CompiladorGUI.TEXT_SECUNDARIO);
-                if (!codigo.endsWith(":")) {
-                    doc.insertString(doc.getLength(), String.format("  %3d  ", n++), sNum);
-                } else {
-                    doc.insertString(doc.getLength(), "       ", sNum);
-                }
-
-                if (codigo.endsWith(":")) {
-                    StyleConstants.setForeground(style, CompiladorGUI.COLOR_WARN);
-                    StyleConstants.setBold(style, true);
-                    doc.insertString(doc.getLength(), codigo + "\n", style);
-                } else {
-                    // Syntax highlighting simple (solo palabras clave)
-                    String[] words = codigo.split(" ");
-                    for (String word : words) {
-                        Style sWord = tacPane.addStyle("word", style);
-                        if (word.equals("IF") || word.equals("GOTO")) {
-                            StyleConstants.setForeground(sWord, CompiladorGUI.ACENTO);
-                            StyleConstants.setBold(sWord, true);
-                        } else if (word.equals("PRINT")) {
-                            StyleConstants.setForeground(sWord, CompiladorGUI.COLOR_EXITO);
-                            StyleConstants.setBold(sWord, true);
-                        } else if (word.equals("HALT")) {
-                            StyleConstants.setForeground(sWord, CompiladorGUI.COLOR_ERROR);
-                            StyleConstants.setBold(sWord, true);
-                        } else if (word.matches("t\\d+")) {
-                            StyleConstants.setForeground(sWord, CompiladorGUI.TOK_RESERVADA);
-                        }
-                        doc.insertString(doc.getLength(), word + " ", sWord);
-                    }
-                    doc.insertString(doc.getLength(), "\n", style);
-                }
-            } catch (BadLocationException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     private void configurarTabla(JTable tabla) {
         tabla.setBackground(CompiladorGUI.BG_PANEL);
@@ -230,13 +131,8 @@ public class ResultadosPanel extends JTabbedPane {
     public void limpiar() {
         tokensPane.setText("");
         tokensCountLabel.setText("Total: 0 tokens generados");
-        sintacticoStatusLabel.setText("Esperando...");
-        sintacticoStatusLabel.setForeground(CompiladorGUI.TEXT_SECUNDARIO);
-        erroresSintacticosPanel.setErrores(null);
         modeloSimbolos.setRowCount(0);
         simbolosCountLabel.setText("Total: 0 simbolos declarados");
         erroresSemanticosPanel.setErrores(null);
-        tacPane.setText("");
-        tacErrorLabel.setVisible(false);
     }
 }

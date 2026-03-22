@@ -7,25 +7,25 @@ import java.time.format.DateTimeFormatter;
 
 public class CompiladorGUI extends JFrame {
     // Paleta de colores (tema oscuro)
-    public static final Color BG_PRINCIPAL   = new Color(30,  30,  46);
-    public static final Color BG_PANEL       = new Color(42,  42,  62);
-    public static final Color BG_EDITOR      = new Color(24,  24,  37);
-    public static final Color TEXT_PRINCIPAL = new Color(205, 214, 244);
-    public static final Color TEXT_SECUNDARIO= new Color(166, 173, 200);
-    public static final Color ACENTO         = new Color(137, 180, 250);
-    public static final Color COLOR_EXITO    = new Color(166, 227, 161);
-    public static final Color COLOR_ERROR    = new Color(243, 139, 168);
-    public static final Color COLOR_WARN     = new Color(250, 179, 135);
-    public static final Color COLOR_BORDE    = new Color(69,  71,  90);
+    public static final Color BG_PRINCIPAL    = Color.WHITE; // blanco hueso
+public static final Color BG_PANEL        = new Color(237, 237, 230); // gris muy claro
+public static final Color BG_EDITOR       = new Color(255, 255, 255); // blanco puro
+public static final Color TEXT_PRINCIPAL  = new Color(40,  40,  60);  // casi negro azulado
+public static final Color TEXT_SECUNDARIO = new Color(90,  95, 120);  // gris medio oscuro
+public static final Color ACENTO          = new Color(30,  90, 200);  // azul fuerte
+public static final Color COLOR_EXITO     = new Color(25, 130,  80);  // verde oscuro
+public static final Color COLOR_ERROR     = new Color(190,  30,  60); // rojo oscuro
+public static final Color COLOR_WARN      = new Color(180, 100,   0); // naranja oscuro
+public static final Color COLOR_BORDE     = new Color(190, 190, 205); // gris azulado claro
 
     // Colores por tipo de token
-    public static final Color TOK_RESERVADA  = new Color(203, 166, 247); // morado
-    public static final Color TOK_IDENTIFIER = new Color(166, 227, 161); // verde
-    public static final Color TOK_NUMBER     = new Color(250, 179, 135); // naranja
-    public static final Color TOK_STRING     = new Color(166, 227, 161); // verde claro
-    public static final Color TOK_CHAR       = new Color(245, 194, 231); // rosa
-    public static final Color TOK_OPERADOR   = new Color(137, 180, 250); // azul
-    public static final Color TOK_DELIMITADOR= new Color(243, 139, 168); // rojo suave
+    public static final Color TOK_RESERVADA   = new Color(220, 200, 255); // morado claro
+public static final Color TOK_IDENTIFIER  = new Color(195, 240, 210); // verde claro
+public static final Color TOK_NUMBER      = new Color(255, 220, 180); // naranja claro
+public static final Color TOK_STRING      = new Color(195, 230, 195); // verde menta
+public static final Color TOK_CHAR        = new Color(255, 210, 230); // rosa claro
+public static final Color TOK_OPERADOR    = new Color(200, 220, 255); // azul claro
+public static final Color TOK_DELIMITADOR = new Color(255, 200, 210); // rojo claro
 
     // Ejemplos
     public static final String EJEMPLO_BASICO =
@@ -185,7 +185,7 @@ public class CompiladorGUI extends JFrame {
 
     private class BarraEstado extends JPanel {
         private final JLabel statusLabel;
-        private final JLabel lblTokens, lblSimbolos, lblTac, lblErrores;
+        private final JLabel lblTokens, lblSimbolos, lblErrores;
         private final JLabel lblHora;
 
         public BarraEstado() {
@@ -205,7 +205,6 @@ public class CompiladorGUI extends JFrame {
             pContadores.setOpaque(false);
             lblTokens = crearContador(pContadores, "Tokens");
             lblSimbolos = crearContador(pContadores, "Simbolos");
-            lblTac = crearContador(pContadores, "TAC");
             lblErrores = crearContador(pContadores, "Errores");
             add(pContadores, BorderLayout.CENTER);
 
@@ -253,7 +252,6 @@ public class CompiladorGUI extends JFrame {
 
             lblTokens.setText(String.valueOf(Math.max(0, r.tokens.size() - 1)));
             lblSimbolos.setText(String.valueOf(r.simbolos.size()));
-            lblTac.setText(String.valueOf(r.instruccionesTAC.size()));
             lblErrores.setText(String.valueOf(r.errores.size()));
 
             lblHora.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
@@ -263,7 +261,6 @@ public class CompiladorGUI extends JFrame {
             setEstado("Listo", Color.GRAY);
             lblTokens.setText("0");
             lblSimbolos.setText("0");
-            lblTac.setText("0");
             lblErrores.setText("0");
             lblHora.setText("--:--:--");
         }
