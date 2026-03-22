@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -88,6 +90,14 @@ public class TablaSimbolos {
             }
         }
         return false;
+    }
+
+    public List<Simbolo> obtenerTodos() {
+        List<Simbolo> todos = new ArrayList<>();
+        for (Map<String, Simbolo> ambito : pilaAmbitos) {
+            todos.addAll(ambito.values());
+        }
+        return todos;
     }
 
     public void imprimir() {
